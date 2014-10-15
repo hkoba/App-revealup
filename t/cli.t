@@ -31,6 +31,12 @@ test_tcp(
         my $res = $ua->get("http://localhost:$port");
         is $res->code, 200;
         is $res->content_type, 'text/html';
+
+        subtest 'content type' => sub {
+            my $res = $ua->get("http://localhost:$port/css/reveal.min.css");
+            is $res->code, 200;
+            is $res->content_type, 'text/css';
+        };
     }
 );
 
