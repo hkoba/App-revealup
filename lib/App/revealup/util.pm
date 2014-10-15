@@ -5,6 +5,7 @@ use base qw/Exporter/;
 use File::ShareDir qw/dist_dir/;
 use Path::Tiny qw/path/;
 use Getopt::Long qw//;
+use Plack::MIME;
 
 our @EXPORT = qw/path_to_res share_path parse_options/;
 
@@ -18,8 +19,13 @@ sub parse_options {
 sub path_to_res {
     my $path = shift;
     if( $path && $path->exists ) {
+        my @headers;
+        if ($path =~ /(\.\w+)\z/
+            and my $mime = Plack::MIME->mime_type($1)) {
+            push @headers, 'Content-Type' => $mime;
+        }
         my $c = $path->slurp();
-        return [200, [ 'Content-Length' => length $c ], [$c]];
+        return [200, [ @headers, 'Content-Length' => length $c ], [$c]];
     }
     return [404, [], ['not found.']];
 }
